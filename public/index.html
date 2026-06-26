@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Data Generator</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+        body { background-color: #f8f9fa; display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
+        .container { background-color: #ffffff; width: 100%; max-width: 800px; padding: 32px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e9ecef; }
+        h3 { color: #1f2937; margin-top: 0; margin-bottom: 12px; font-size: 18px; }
+        p { color: #4b5563; font-size: 14px; margin-bottom: 16px; }
+        textarea { width: 100%; height: 120px; padding: 16px; font-size: 14px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; margin-bottom: 20px; color: #374151; line-height: 1.5; font-family: monospace; }
+        textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        button { width: 100%; background-color: #2563eb; color: #ffffff; border: none; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: #1d4ed8; }
+        button:disabled { background-color: #93c5fd; cursor: not-allowed; }
+        .resultado-container { margin-top: 32px; display: none; }
+        .resultado-container.ativo { display: block; }
+        .resultado-box { background-color: #111827; color: #10b981; padding: 24px; border-radius: 8px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; font-family: monospace; overflow-x: auto; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Gerador de Mock Data (JSON)</h3>
+    <p>Informe a quantidade de registros e os campos desejados (ex: id, nome, email, dataNasc, etc).</p>
+    
+    <textarea id="prompt" placeholder="Ex: Gere 3 registros de usuários com os campos: id (uuid), nome completo, email corporativo, dataNasc (YYYY-MM-DD) e is_active (boolean)."></textarea>
+    
+    <button id="btnEnviar" onclick="enviar()">Gerar JSON</button>
+
+    <div class="resultado-container" id="resultadoContainer">
+        <h3>Resultado</h3>
+        <div class="resultado-box" id="resposta">Aguardando...</div>
+    </div>
+</div>
+
+<script>
+    async function enviar() {
+        const prompt = document.getElementById("prompt").value;
+        const output = document.getElementById("resposta");
+        const container = document.getElementById("resultadoContainer");
+        const btn = document.getElementById("btnEnviar");
+
+        if (!prompt.trim()) {
+            alert("Por favor, descreva a estrutura do JSON que você precisa.");
+            return;
+        }
+
+        container.classList.add("ativo");
+        output.textContent = "Processando array...\nIsto pode levar alguns segundos.";
+        output.style.color = "#9ca3af"; 
+        btn.disabled = true;
+        btn.textContent = "Gerando dados...";
+
+        try {
+            const response = await fetch("/api/llm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                output.style.color = "#ef4444";
+                output.textContent = data.erro || "Erro desconhecido.";
+            } else {
+                output.style.color = "#10b981";
+                output.textContent = data.resposta;
+            }
+        } catch (error) {
+            output.style.color = "#ef4444";
+            output.textContent = "Erro de conexão. O servidor local está rodando?";
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Gerar JSON";
+        }
+    }
+</script>
+</body>
+</html>

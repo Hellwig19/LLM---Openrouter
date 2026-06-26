@@ -1,0 +1,11 @@
+npm i
+
+Criar arquivo .env
+
+OPENROUTER_API_KEY=sua_chave 
+
+Iniciar Servidor:
+
+npm start
+
+Se tudo estiver correto, o terminal exibirá a mensagem: Servidor rodando em http://localhost:3000
