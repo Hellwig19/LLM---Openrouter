@@ -5,60 +5,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Data Generator</title>
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
-        body { background-color: #f8f9fa; display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
-        .container { background-color: #ffffff; width: 100%; max-width: 800px; padding: 32px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e9ecef; }
-        h3 { color: #1f2937; margin-top: 0; margin-bottom: 12px; font-size: 18px; }
-        p { color: #4b5563; font-size: 14px; margin-bottom: 16px; }
-        textarea { width: 100%; height: 120px; padding: 16px; font-size: 14px; border: 1px solid #d1d5db; border-radius: 6px; resize: vertical; margin-bottom: 20px; color: #374151; line-height: 1.5; font-family: monospace; }
-        textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        button { width: 100%; background-color: #2563eb; color: #ffffff; border: none; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
-        button:hover { background-color: #1d4ed8; }
-        button:disabled { background-color: #93c5fd; cursor: not-allowed; }
-        .resultado-container { margin-top: 32px; display: none; }
+        :root {
+            color-scheme: light;
+            --bg: #f4efe8;
+            --surface: rgba(255, 255, 255, 0.9);
+            --surface-strong: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: rgba(31, 41, 55, 0.12);
+            --accent: #0f766e;
+            --accent-hover: #115e59;
+            --code-bg: #0b1020;
+            --code-text: #7ef0cb;
+            --shadow: 0 24px 70px rgba(15, 23, 42, 0.15);
+        }
+
+        * { box-sizing: border-box; font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 32%),
+                radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.14), transparent 30%),
+                linear-gradient(180deg, #fbf8f3 0%, var(--bg) 100%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 920px;
+            padding: 32px;
+            border-radius: 24px;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .hero {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: clamp(28px, 4vw, 42px);
+            line-height: 1.05;
+        }
+
+        .hero p,
+        .hint {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 0.6fr;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .field-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        textarea, select, input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--surface-strong);
+            color: var(--text);
+        }
+
+        textarea {
+            min-height: 152px;
+            resize: vertical;
+            line-height: 1.5;
+            font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+        }
+
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            border-color: rgba(15, 118, 110, 0.55);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin: 16px 0 22px;
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), #0891b2);
+            color: #ffffff;
+            border: none;
+            padding: 15px 18px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s;
+            box-shadow: 0 16px 32px rgba(15, 118, 110, 0.22);
+        }
+
+        button:hover { transform: translateY(-1px); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .resultado-container { margin-top: 30px; display: none; }
         .resultado-container.ativo { display: block; }
-        .resultado-box { background-color: #111827; color: #10b981; padding: 24px; border-radius: 8px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; font-family: monospace; overflow-x: auto; }
+        .resultado-box {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 24px;
+            border-radius: 18px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.7;
+            font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+            overflow-x: auto;
+            border: 1px solid rgba(126, 240, 203, 0.15);
+        }
+
+        .resultado-header {
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 760px) {
+            .container { padding: 22px; border-radius: 20px; }
+            .form-grid,
+            .controls { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h3>Gerador de Mock Data (JSON)</h3>
-    <p>Informe a quantidade de registros e os campos desejados (ex: id, nome, email, dataNasc, etc).</p>
-    
-    <textarea id="prompt" placeholder="Ex: Gere 3 registros de usuários com os campos: id (uuid), nome completo, email corporativo, dataNasc (YYYY-MM-DD) e is_active (boolean)."></textarea>
-    
-    <button id="btnEnviar" onclick="enviar()">Gerar JSON</button>
+    <div class="hero">
+        <p class="eyebrow">Mock Data Generator</p>
+        <h3>Gerador de massa de dados</h3>
+        <p>Informe os campos, escolha o formato e gere de 5 a 100 registros prontos para copiar em JSON ou SQL.</p>
+    </div>
+
+    <div class="field-group">
+        <label for="fields">Campos desejados</label>
+        <textarea id="fields" placeholder="Ex: id, nome completo, email, data_criacao, status"></textarea>
+        <p class="hint">Separe os campos por vírgula, ponto e vírgula ou quebra de linha. Quanto mais específico, mais realista o resultado.</p>
+    </div>
+
+    <div class="controls">
+        <div class="field-group">
+            <label for="format">Formato</label>
+            <select id="format">
+                <option value="json">JSON</option>
+                <option value="sql">SQL INSERT INTO</option>
+            </select>
+        </div>
+
+        <div class="field-group">
+            <label for="recordCount">Quantidade</label>
+            <input id="recordCount" type="number" min="5" max="100" value="8" />
+        </div>
+
+        <div class="field-group">
+            <label>&nbsp;</label>
+            <button id="btnEnviar" onclick="enviar()">Gerar saída</button>
+        </div>
+    </div>
 
     <div class="resultado-container" id="resultadoContainer">
-        <h3>Resultado</h3>
+        <div class="resultado-header">
+            <h3 style="font-size: 18px; margin: 0;">Resultado</h3>
+        </div>
         <div class="resultado-box" id="resposta">Aguardando...</div>
     </div>
 </div>
 
 <script>
     async function enviar() {
-        const prompt = document.getElementById("prompt").value;
+        const fields = document.getElementById("fields").value;
+        const format = document.getElementById("format").value;
+        const recordCount = document.getElementById("recordCount").value;
         const output = document.getElementById("resposta");
         const container = document.getElementById("resultadoContainer");
         const btn = document.getElementById("btnEnviar");
 
-        if (!prompt.trim()) {
-            alert("Por favor, descreva a estrutura do JSON que você precisa.");
+        if (!fields.trim()) {
+            alert("Por favor, informe os campos que deseja gerar.");
+            return;
+        }
+
+        const parsedCount = Number.parseInt(recordCount, 10);
+        if (!Number.isNaN(parsedCount) && parsedCount > 100) {
+            alert("A quantidade máxima é 100 registros.");
             return;
         }
 
         container.classList.add("ativo");
-        output.textContent = "Processando array...\nIsto pode levar alguns segundos.";
+        output.textContent = "Processando dados...\nIsto pode levar alguns segundos.";
         output.style.color = "#9ca3af"; 
         btn.disabled = true;
-        btn.textContent = "Gerando dados...";
+        btn.textContent = "Gerando...";
 
         try {
             const response = await fetch("/api/llm", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt })
+                body: JSON.stringify({ fields, format, recordCount })
             });
 
             const data = await response.json();
@@ -67,16 +247,30 @@
                 output.style.color = "#ef4444";
                 output.textContent = data.erro || "Erro desconhecido.";
             } else {
-                output.style.color = "#10b981";
-                output.textContent = data.resposta;
+                output.style.color = "#7ef0cb";
+                output.textContent = format === "json" ? normalizeDisplayJson(data.resposta) : data.resposta;
             }
         } catch (error) {
             output.style.color = "#ef4444";
             output.textContent = "Erro de conexão. O servidor local está rodando?";
         } finally {
             btn.disabled = false;
-            btn.textContent = "Gerar JSON";
+            btn.textContent = "Gerar saída";
         }
+    }
+
+    function normalizeDisplayJson(text) {
+        return String(text || "")
+            .replace(/"full_name"\s*:/gi, '"nome":')
+            .replace(/"fullname"\s*:/gi, '"nome":')
+            .replace(/"first_name"\s*:/gi, '"nome":')
+            .replace(/"last_name"\s*:/gi, '"nome":')
+            .replace(/"corporate_email"\s*:/gi, '"email":')
+            .replace(/"corporate email"\s*:/gi, '"email":')
+            .replace(/"email_address"\s*:/gi, '"email":')
+            .replace(/"created_at"\s*:/gi, '"data_criacao":')
+            .replace(/"creation_date"\s*:/gi, '"data_criacao":')
+            .replace(/"is_active"\s*:/gi, '"status":');
     }
 </script>
 </body>
